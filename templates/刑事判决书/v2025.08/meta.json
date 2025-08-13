@@ -1,0 +1,42 @@
+{
+  "doc_type": "刑事判决书",
+  "version": "v2025.08",
+  "fields": [
+    {
+      "name": "court_name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "case_no",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "parties",
+      "type": "table"
+    },
+    {
+      "name": "facts",
+      "type": "richtext"
+    },
+    {
+      "name": "legal_basis",
+      "type": "list"
+    },
+    {
+      "name": "reasoning",
+      "type": "richtext"
+    },
+    {
+      "name": "decision",
+      "type": "richtext"
+    }
+  ],
+  "style_guide": {
+    "font": "仿宋_GB2312",
+    "size": 14,
+    "line_spacing": 1.5,
+    "indent": "2ch"
+  }
+}

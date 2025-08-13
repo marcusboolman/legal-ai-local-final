@@ -1,0 +1,9 @@
+steps:
+  - name: extract_text
+    uses: ocr/pdf_extract
+  - name: clean_and_chunk
+    uses: text/segment
+    with:
+      max_len: 800
+  - name: embed_and_index
+    uses: vector/build

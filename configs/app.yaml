@@ -1,0 +1,16 @@
+server:
+  host: 0.0.0.0
+  port: 8000
+llm:
+  endpoint: http://vllm:8000/v1
+  model: Qwen2.5-14B-Instruct
+storage:
+  db_url: postgresql://postgres:pass@postgres:5432/legal
+  object:
+    endpoint: http://minio:9000
+    access_key: minio
+    secret_key: minio123
+    bucket: legal-data
+rag:
+  embed_model: bge-large-zh
+  top_k: 6

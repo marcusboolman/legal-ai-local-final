@@ -1,0 +1,104 @@
+version: "3.9"
+services:
+  api:
+    image: python:3.11-slim
+    container_name: legal-api
+    working_dir: /app
+    command: bash -lc "apt-get update && apt-get install -y jq && pip install --no-cache-dir fastapi uvicorn[standard] pydantic[dotenv] psycopg2-binary boto3 httpx pgvector openai docxtpl python-docx pymupdf pdfplumber pillow pandas paddleocr onnxruntime ffmpeg-python pydub faster-whisper sentence-transformers faiss-cpu && uvicorn main:app --host 0.0.0.0 --port 8000"
+    ports: ["8000:8000"]
+    volumes:
+      - ./api:/app
+      - ./configs:/configs
+      - ./data:/data
+    environment:
+      - DB_URL=postgresql://postgres:pass@postgres:5432/legal
+      - OBJECT_ENDPOINT=http://minio:9000
+      - OBJECT_ACCESS_KEY=minio
+      - OBJECT_SECRET_KEY=minio123
+      - LLM_ENDPOINT=http://vllm:8000/v1
+      - OPENAI_API_KEY=not_used
+    depends_on: [postgres, minio, vllm]
+
+  vllm:
+    image: vllm/vllm-openai:latest
+    command: --model Qwen2.5-14B-Instruct
+    ports: ["8001:8000"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
+    environment:
+      - VLLM_WORKER_MULTIPROC_METHOD=spawn
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=legal
+    ports: ["5432:5432"]
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    ports: ["9000:9000","9001:9001"]
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    volumes:
+      - ./data:/data
+
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+
+  celery_worker:
+    image: python:3.11-slim
+    container_name: legal-celery
+    working_dir: /app
+    command: bash -lc "pip install --no-cache-dir celery redis psycopg2-binary && celery -A tasks.celery_app worker --loglevel=info"
+    volumes:
+      - ./api:/app
+      - ./workers:/app/workers
+      - ./scripts:/app/scripts
+    depends_on: [api, redis, postgres]
+
+
+  milvus:
+    image: milvusdb/milvus:2.3.1
+    container_name: milvus
+    environment:
+      - TZ=UTC
+    ports: ["19530:19530","19121:19121"]
+    volumes:
+      - ./milvus:/var/lib/milvus
+
+cross_rerank_service:
+  image: python:3.11-slim
+  container_name: cross-rerank
+  working_dir: /app
+  # Expects a pre-downloaded cross-encoder model in ./models/cross_encoder
+  command: bash -lc "pip install --no-cache-dir sentence-transformers && uvicorn cross_rerank_service:app --host 0.0.0.0 --port 8100"
+  volumes:
+    - ./api:/app
+    - ./models/cross_encoder:/models/cross_encoder
+  ports: ["8100:8100"]
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - capabilities: [gpu]
+  environment:
+    - CROSS_ENCODER_MODEL=/models/cross_encoder
+
+    image: python:3.11-slim
+    container_name: cross-rerank
+    working_dir: /app
+    command: bash -lc "pip install --no-cache-dir sentence-transformers && uvicorn cross_rerank_service:app --host 0.0.0.0 --port 8100"
+    volumes:
+      - ./api:/app
+    ports: ["8100:8100"]

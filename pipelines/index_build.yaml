@@ -1,0 +1,5 @@
+steps:
+  - name: build_law_index
+    uses: vector/build
+  - name: build_case_index
+    uses: vector/build

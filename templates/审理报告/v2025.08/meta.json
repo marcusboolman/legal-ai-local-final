@@ -1,0 +1,34 @@
+{
+  "doc_type": "审理报告",
+  "version": "v2025.08",
+  "fields": [
+    {
+      "name": "court_name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "case_no",
+      "type": "text",
+      "required": true
+    },
+    {
+      "name": "summary",
+      "type": "richtext"
+    },
+    {
+      "name": "focus_points",
+      "type": "list"
+    },
+    {
+      "name": "todo_missing_materials",
+      "type": "list"
+    }
+  ],
+  "style_guide": {
+    "font": "仿宋_GB2312",
+    "size": 14,
+    "line_spacing": 1.5,
+    "indent": "2ch"
+  }
+}

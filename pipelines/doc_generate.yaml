@@ -1,0 +1,7 @@
+steps:
+  - name: assemble_context
+    uses: rag/pack
+  - name: draft_with_llm
+    uses: llm/generate
+  - name: render_docx
+    uses: docxtpl/render

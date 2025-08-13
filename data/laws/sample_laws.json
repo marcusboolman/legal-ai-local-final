@@ -1,0 +1,22 @@
+[
+  {
+    "title": "刑法(2020修正)",
+    "articles": [
+      {
+        "article_no": "XXX",
+        "text": "【示例】本条为演示用文本。",
+        "version_id": "2020"
+      }
+    ]
+  },
+  {
+    "title": "民法典(2021)",
+    "articles": [
+      {
+        "article_no": "YYY",
+        "text": "【示例】本条为演示用文本。",
+        "version_id": "2021"
+      }
+    ]
+  }
+]
